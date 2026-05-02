@@ -1,8 +1,8 @@
 #include "Product.h"
+#include "OrderSystem.h"
 #include <iostream>
-#include <string>
-using namespace std;
 
+using namespace std;
 
 int Product::totalProducts = 0;
 
@@ -75,12 +75,8 @@ void OfficeSupply::display() const {
     cout << " | Office Supply - Category: " << category << " | Material: " << material << endl;
 }
 
-
 int main() {
-    cout << "\n========== SMART STORE - PRODUCT MANAGEMENT DEMO ==========\n" << endl;
-    cout << "Team Member A: Product Module\n" << endl;
-
-    // Create products using base class pointers (polymorphism)
+    cout << "\n========== SMART STORE FULL SYSTEM ==========\n" << endl;
     Product* products[4];
 
     products[0] = new Book(101, "Clean Code", 45.99, 10, "Robert Martin", 464);
@@ -88,41 +84,53 @@ int main() {
     products[2] = new OfficeSupply(103, "Stapler", 12.50, 50, "Office", "Metal");
     products[3] = new Book(104, "Design Patterns", 55.99, 7, "Erich Gamma", 395);
 
-    // 1. Display all products (demonstrates overridden display() and operator<<)
-    cout << "--- All Products ---" << endl;
+    cout << "\n--- All Products ---" << endl;
     for (int i = 0; i < 4; i++) {
-        cout << *products[i] << endl;      // Using overloaded <<
-        products[i]->display();             // Using overridden display()
+        cout << *products[i] << endl;
+        products[i]->display();
         cout << "------------------------" << endl;
     }
 
-    // 2. Demonstrate operator+ (increase quantity)
+    // Operator overloading
     cout << "\n--- Adding 5 copies to 'Clean Code' ---" << endl;
     *products[0] + 5;
     cout << "After adding: " << *products[0] << endl;
 
-    // 3. Demonstrate operator== (compare prices)
-    cout << "\n--- Comparing Prices with operator== ---" << endl;
-    if (*products[0] == *products[2])
-        cout << "Clean Code and Stapler have the same price" << endl;
-    else
-        cout << "Clean Code and Stapler have different prices" << endl;
-
-    // 4. Demonstrate friend function
+    // Comparison
+    cout << "\n--- Comparing Prices ---" << endl;
     comparePrice(*products[1], *products[3]);
 
-    // 5. Demonstrate static function
-    cout << "\n--- Total Products Created (Static Function) ---" << endl;
-    cout << "Total products in system: " << Product::getTotalProducts() << endl;
+    cout << "\nTotal products: " << Product::getTotalProducts() << endl;
 
-    // Cleanup
-    cout << "\n--- Cleaning up ---" << endl;
-    for (int i = 0; i < 4; i++) {
-        delete products[i];
+    cout << "\n========== PART 2: ORDER SYSTEM ==========\n";
+
+    // Customers
+    Customer* c1 = new Customer("Ali");
+    Customer* c2 = new PremiumCustomer("Ahmed", 0.1);
+
+    // Payments
+    Payment* pay1 = new CashPayment();
+    Payment* pay2 = new CardPayment("1234567891234567");
+
+    // Orders
+    Order order1(c1, pay1);           // Pickup
+    Order order2(c2, pay2, 20);       // Delivery
+
+    try {
+        // Add items
+        order1.addItem(products[0], 2);
+        order1.addItem(products[2], 5);
+
+        order2.addItem(products[1], 1);
+        order2.addItem(products[3], 2);
+
+        // Print invoices
+        order1.printInvoice();
+        order2.printInvoice();
+
     }
-
-    cout << "\nTotal products after cleanup: " << Product::getTotalProducts() << endl;
-    cout << "\n========== DEMO COMPLETE ==========\n" << endl;
-
+    catch (exception& e) {
+        cout << "Error: " << e.what() << endl;
+    }
     return 0;
 }
